@@ -1,0 +1,124 @@
+---
+title: "Project Part 3" 
+fontsize: 12pt
+geometry: margin=1in
+urlcolor: black
+output: pdf_document
+header-includes:
+- \usepackage{setspace}
+- \onehalfspacing
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, highlight=FALSE)
+```
+
+```{r, echo=FALSE, warning=FALSE}
+knitr::opts_chunk$set(fig.width=11, fig.height=7) 
+library(tidyverse)
+library(ggplot2)
+college = read.csv("/Users/skyejung/Downloads/CollegeScorecard_Raw_Data_08032021/MERGED2019_20_PP.csv")
+tuition = read.csv('/Users/skyejung/Desktop/STAT 3080/ic2020_ay.csv')
+data1 = select(college, UNITID, INSTNM,CITY,STABBR,PREDDEG,ADM_RATE,ACTCMMID,SAT_AVG,
+              PCTFLOAN,COSTT4_A)
+data2 = select(tuition, TUITION2, TUITION3,UNITID)
+projectdata = merge(data1, data2, by="UNITID")
+test = projectdata[!projectdata$ADM_RATE == "NULL", ]
+test2 = test[!test$ACTCMMID == "NULL", ]
+test3 = test2[!test2$SAT_AVG == "NULL", ]
+test4 = test3[!test3$PCTFLOAN == "NULL", ]
+test5 = test4[!test4$COSTT4_A == "NULL", ]
+test6 = test5[!test5$STABBR == 'VI',]
+adm = as.numeric(test6$ADM_RATE)
+act = as.numeric(test6$ACTCMMID)
+sat = as.numeric(test6$SAT_AVG)
+loan = as.numeric(test6$PCTFLOAN)
+cost = as.numeric(test6$COSTT4_A)
+state = test6$STABBR
+name = test6$INSTNM
+city = test6$CITY
+degree = test6$PREDDEG
+instate = test6$TUITION2
+outstate = test6$TUITION3
+graphdata = data.frame(name,state,city,adm,act,sat,loan,cost,degree,instate,outstate)
+```
+## Research Questions
+Through this project, I plan to answer the following research questions regarding the effects of college admission scores, rates, and financial aid on tuition costs:
+
+1. How does the average SAT/ACT score of students in US colleges affect the colleges’ average annual total cost of attendance?
+
+2. How does the percentage of students receiving federal student loans in US colleges affect the colleges’ average annual total cost of attendance?
+
+3. How does the admission rate for US colleges affect the colleges’ average annual total cost of attendance?
+
+## Data Explanation and Classification
+To answer these research questions, I used data from the US Department of Education’s College Scorecard and different datasets from the National Center for Education Statistics. The US Department of Education’s College Scorecard is regularly updated and provides information on institutional characteristics including enrollment, student aid, costs, and more (“College Scorecard”). The data from the National Center for Education Statistics also provides institutional characteristic information, more specifically student charges for the academic year at different US colleges (“NCES Complete Data Files”). 
+
+I compiled the two datasets by merging the Scorecard data and the NCES data by the university ID and created a table that describes admission information (admission rates/test scores), costs, and financial aid. Through this data, information about what institutional characteristics affect the total cost of attendance can be analyzed. There are also different categorical variables that could further describe the characteristics, including state of the university, the predominant degree awarded, etc. The data is a sample of US colleges; only institutions that are a part of federal financial aid programs are accounted for in this dataset. Because not all of the universities in the US’s data are collected, it is not population data.
+
+## Data Collection
+The data from the NCES was collected through the Integrated Postsecondary Education Data System (IPEDS) which is an annual collection of surveys by the US Department of Education. Title IV of the Higher Education Act of 1965 enforces that institutions that participate in programs for federal student financial aid submit their data to IPEDS. Therefore the sample selection was based on whether the university was a part of a federal financial aid program (“Technical Documentation: College Scorecard Institution-Level Data”). Data that is submitted to this survey relates to enrollment, financial aid, graduation rates, program completion, costs, and other general institutional characteristics. Institutions submit their IPEDS survey data through a web-based application system called the IPEDS Data Collection System (DCS). Then, the data is reviewed, locked, and verified through quality control processes before being released to the public (“A Comprehensive Look at the IPEDS Reporting Process”). 
+
+The College Scorecard was also collected in a similar fashion as the NCES data as they were both done through surveys by the US Department of Education. However, the College Scorecard also borrowed data collected by the Department of Treasury and the National Student Loan Data System to further add graduation rates, cost, and loan/grant information and combined it with the data collected by the US Department of Education (“Behind the Scenes: Building a New College Scorecard with Students”).
+
+## Data Contents
+The compiled dataset is built of more than 3,000 observations. Each row/observation is a different university in the US that participates in federal student financial aid programs, and there is a large variety of universities for each state. For each observation in the data, there are 11 different columns. The included variables are the following: University, City, State, Predominant Degree, Admission Rate, Average SAT, Average ACT, Cost, Aid, In-State Cost, and Out-of-State Cost. 
+
+The first three columns are straight forward categorical variables; they state the name of the university and the city/state they are located in. The Predominant Degree column is also a categorical variable that states the degree a majority of the students at the university are awarded (1 for certificate degrees, 2 for associate’s, 3 for bachelor’s, and 4 for graduate). The Admission Rate column gives the percentage of students admitted into the university out of the total applicants. The Average SAT and ACT columns state the average test score of the students admitted into the university for each respective test. The Cost column states the total annual average cost of attendance. The Aid column states the percentage of students in each university that receive a federal loan in an academic year. Finally, the In-State and Out-of-State Cost columns give the average cost of attendance for in-state and out-of-state students, respectively.
+
+## Data Issues
+Initially, I had planned to focus on universities in a specific state (e.g. observations for the data are universities in Virginia); however, when subsetting the data to a specific state, it was very apparent that many of the values throughout the columns were NAs. More specifically, while many observations are not missing any values, when some observations do have missing values, they are missing multiple columns of data (e.g Admission Rate, Average ACT, and Average SAT). Therefore, a major potential issue for my dataset is how I could go about dropping the NA values throughout my data without losing too much information that could potentially hinder the analysis. 
+
+With over 3,000 observations, dropping all the NAs in the data may not be the worst resolution to this issue, as there would probably be a healthy number of observations even after. I could also potentially check to see which state has very little observations with NAs and create a smaller sample data that is not missing too much information.
+
+## Data Appropriateness
+This data is very appropriate to address my three research questions, as all of the components in the questions are described as variables in the data. All of my listed research questions revolve around finding out how different institutional characteristics of universities in the US affect average total cost of attendance, which is one of the columns in my dataset that could act as the response variable. Furthermore, the questions ask if average admission test score, admission rate, and percentage of students receiving federal student loans affect the response variable of cost, which can all be described by the data variables Average SAT/ACT score, Admission Rate, and Aid, respectively.
+
+## Numerical Summary
+```{r}
+num = group_by(graphdata, state) %>%
+  summarize(top_avg_cost=mean(cost), avg_admission_rate=mean(adm), 
+            avg_loan_pct = mean(loan), 
+            avg_sat_scores = mean(sat))%>%
+  arrange(desc(top_avg_cost))
+num2 = group_by(graphdata, state) %>%
+  summarize(lowest_avg_cost=mean(cost), avg_admission_rate=mean(adm), 
+            avg_loan_pct = mean(loan), 
+            avg_sat_scores = mean(sat))%>%
+  arrange(desc(lowest_avg_cost))
+head(num,5)
+tail(num2,5)
+```
+
+## Graphical Summaries
+```{r}
+ggplot(graphdata, aes(x=adm, y=cost)) + 
+  geom_point()+geom_smooth(method='lm') +
+  labs(title="University Admission Rates on Total Annual Cost of Attendance", 
+                x="Admission Rate", 
+       y="Total Annual Cost of Attendance")
+ggplot(graphdata, aes(x=sat, y=cost)) + 
+  geom_point()+geom_smooth(method='lm') +
+  labs(title="Admission SAT Scores on Total Annual Cost of Attendance", 
+                x="Average SAT Score", 
+       y="Total Annual Cost of Attendance")
+ggplot(graphdata, aes(x=loan, y=cost)) + 
+  geom_point()+geom_smooth(method='lm') +
+  labs(title=
+      "Percentage of Students with Federal Loans on Total Annual Cost of Attendance", 
+        x="Percentage of Students with Federal Loans", 
+      y="Total Annual Cost of Attendance")
+```
+
+## Conclusions
+Looking at the first scatter plot, there seems to be a slightly strong negative relationship between admission rate and total annual cost of attendance. The second scatter plot displays a strong positive relationship between average SAT scores among admitted students and total annual cost of attendance. Finally, the third scatter plot displays a very weak relationship between the percentage of students with federal loans at a university and total annual cost of attendance. Ultimately, based on the scatter plots plotting the three explanatory variables from the research question, we can conclude that among US universities, as rate of admission increases, the total annual cost of attendance decreases, and as average SAT scores among admitted students increases, the total annual cost of attendance also increases.
+
+These conclusions align with the numerical summaries outputted. It is very clear that the top 5 states with the highest average cost of attendance generally have overall higher average SAT scores and lower admission rates state-wide (ranging from 37-61% admission rates and 1300-1200 SAT scores), compared to the top 5 states with the lowest average cost of attendance (ranging from 75-95% admission rates and 1000-1200 SAT scores).
+
+\newpage
+
+## References
+1. <https://collegescorecard.ed.gov/data/>
+2. <https://nces.ed.gov/ipeds/datacenter/DataFiles.aspx?goToReportId=7>
+3. <https://collegescorecard.ed.gov/assets/FullDataDocumentation.pdf>
+4. <https://precisioncampus.com/blog/ipeds/#:~:text=%20The%20NCES%20details%20the%20six%20steps%20of,that%20the%20keyholder%20must%20resolve%20before...%20More%20>
+5. <https://18f.gsa.gov/2015/09/14/college-scorecard-launch/>
